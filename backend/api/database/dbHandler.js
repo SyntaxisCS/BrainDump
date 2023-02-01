@@ -94,6 +94,7 @@ let newUserObject = {
     userType: "user", // or admin
     planType: "free", // or paid
     email_verified: false
+    email_verified_date: null
     dateJoined: "currentDate"
 };
 */
@@ -147,8 +148,8 @@ const createUser = async (newUser) => {
                         // DB query
                         let query = {
                             name: "createUser",
-                            text: "INSERT INTO users (uuid, name, email, password, user_type, plan_type, email_verified, date_joined) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
-                            values: [newUser.uuid, newUser.name, normalizedEmail, hashedPassword, newUser.userType, newUser.planType, newUser.verifyEmail, newUser.dateJoined]
+                            text: "INSERT INTO users (uuid, name, email, password, user_type, plan_type, email_verified, email_verified_date, date_joined) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+                            values: [newUser.uuid, newUser.name, normalizedEmail, hashedPassword, newUser.userType, newUser.planType, newUser.verifyEmail, newUser.emailVerifyDate, newUser.dateJoined]
                         };
                         DB.query(query).then(response => {
                             resolve(response);
@@ -258,6 +259,7 @@ const changeUserEmail = async (email, newEmail) => {
             if (user.email === newEmail) {
                 reject("Emails cannot match");
             } else {
+                
                 let query = {
                     name: "changeUserEmail",
                     text: "UPDATE users SET email = $1 WHERE email = $2",
@@ -273,6 +275,40 @@ const changeUserEmail = async (email, newEmail) => {
         }, err => {
             console.error(err);
             reject("Could not verify email: getUserByEmail");
+        });
+    });
+};
+
+// Verify Email
+const verifyEmail = async (email) => {
+    return new Promise((resolve, reject) => {
+        getUserByEmail(email).then(user => {
+
+            // Email not verified
+            if (!user.email_verified) {
+                let verifiedDate = new Date();
+
+                let query = {
+                    name: "verifyEmail",
+                    text: "UPDATE users SET email_verified = $1,email_verified_date = $2 WHERE email = $3",
+                    values: [true, verifiedDate, email]
+                };
+
+                DB.query(query).then(response => {
+                    // send email verified email
+                    resolve(`${user.uuid} has verified the email ${email}`);
+                }, err => {
+                    console.error(err);
+                    reject("Could not verify email");
+                });
+            } else {
+                // email already verified
+                reject(`${user.uuid} has already verified the email ${email} on ${user.email_verified_date ? user.email_verified_date : "an unknown date and time"}`);
+            }
+
+        }, err => {
+            console.error(err);
+            reject("User does not exist");
         });
     });
 };
@@ -951,7 +987,8 @@ module.exports = {
     deleteUser, 
     changeUserName,
     changeUserPassword, 
-    changeUserEmail, 
+    changeUserEmail,
+    verifyEmail,
     authenticate,
     
     // Notes

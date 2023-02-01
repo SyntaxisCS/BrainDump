@@ -12,7 +12,7 @@ const users = express.Router();
 const nodeMailer = require("nodemailer");
 
 // Database Handlers
-const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate} = require("./database/dbHandler");
+const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail} = require("./database/dbHandler");
 
 // Helpers
 const {generateUUID} = require("../Utils/uuidGenerator");
@@ -165,6 +165,7 @@ users.post("/create", (req, res) => {
         userType: "user",
         planType: "free",
         verifyEmail: false,
+        emailVerifyDate: null,
         dateJoined: date
     };
 
@@ -352,9 +353,9 @@ users.post("/forgotpassword", forgotPasswordLimiter, (req, res) => {
         }, err => {
             // either token does not exist or has expired. Error Handling
             if (err === "Token has expired") {
-                res.status().send({error: "Token has expired"});
+                res.status(400).send({error: "Token has expired"});
             } else if (err === "Token does not exist") {
-                res.status().send({error: "Token does not exist"});
+                res.status(400).send({error: "Token does not exist"});
             } else {
                 console.error(err);
                 res.status(500).send({error: "Server Error"});
@@ -380,7 +381,35 @@ user.post("/verifyemail", emailLimiter, (req, res) => {
     /* req.body.token */
 
     if (req.body.token) {
-        
+        checkVerificationToken(req.body.token).then(good => {
+            // get user with id found with token
+            getUserByUUID(good.user_id).then(user => {
+                // verify email
+                verifyEmail(user.email).then(response => {
+                    res.status(201).send(`Email verified on ${new Date()}`);
+                }, err => {
+                    if (err.includes("has already verified the email")) {
+                        res.status(400).send({error: "You have already verified your email!"});
+                    } else if (err === "User does not exist") {
+                        res.status(400).send({error: err});
+                    } else {
+                        res.status(500).send({error: "Server Error"});
+                    }
+                });
+            }, err => {
+                console.error(err);
+                res.status(500).send({error: "Could not verify email"});
+            });
+        }, err => {
+            if (err === "Token has expired") {
+                res.status(400).send({error: "Token has expired"});
+            } else if (err === "Token does not exist") {
+                res.status(400).send({error: "Token does not exist"});
+            } else {
+                console.error(err);
+                res.status(500).send({error: "Server Error"});
+            }
+        });
     }
 });
 
