@@ -691,26 +691,60 @@ const getKey = async (userId) => {
 // Password Tokens
 const addPasswordToken = async (userId, token) => {
     return new Promise((resolve, reject) => {
-        let expire = moment().add(10, 'minutes').toISOString();
+        // check if token exists
+        getPasswordToken(userId).then(token => {
+            // delete then create
+            deletePasswordToken(userId).then(success => {
+                // Token deleted, create new
+                let expire = moment().add(10, 'minutes').toISOString();
 
-        const url = `http://localhost:9801/forgotpassword/${token}`;
+                const url = `http://localhost:9801/forgotpassword/${token}`;
 
-        let query = {
-            name: "addPasswordToken",
-            text: "INSERT INTO password_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
-            values: [userId, token, expire]
-        };
+                let query = {
+                    name: "addPasswordToken",
+                    text: "INSERT INTO password_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                    values: [userId, token, expire]
+                };
 
-        DB.query(query).then(response => {
-            if (response.rowCount > 0) {
-                // success
-                resolve(url);
-            } else {
-                reject("Could not add token");
-            }
+                DB.query(query).then(response => {
+                    if (response.rowCount > 0) {
+                        // success
+                        resolve(url);
+                    } else {
+                        reject("Could not add token");
+                    }
+                }, err => {
+                    // fail
+                    reject(err);
+                });
+            }, err => {
+                // failed to delete
+                console.error(err);
+                reject("Token already exists, could not delete old token, therefore did not create new token");
+            });
         }, err => {
-            // fail
-            reject(err);
+            // token does not exist, preceed as normal
+            let expire = moment().add(10, 'minutes').toISOString();
+
+            const url = `http://localhost:9801/forgotpassword/${token}`;
+
+            let query = {
+                name: "addPasswordToken",
+                text: "INSERT INTO password_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                values: [userId, token, expire]
+            };
+
+            DB.query(query).then(response => {
+                if (response.rowCount > 0) {
+                    // success
+                    resolve(url);
+                } else {
+                    reject("Could not add token");
+                }
+            }, err => {
+                // fail
+                reject(err);
+            });
         });
     });
 };
@@ -752,7 +786,7 @@ const checkPasswordToken = async (token) => {
                     resolve(response.rows[0]);
                 } else {
                     // if token has expired then delete and reject
-                    deleteToken(response.rows[0].user_id).then(success => {
+                    deletePasswordToken(response.rows[0].user_id).then(success => {
                         reject("Token has expired");
                     }, err => {
                         console.error(err);
@@ -785,27 +819,61 @@ const deletePasswordToken = async (userId) => {
 // Verification Tokens
 const addVerificationToken = async (userId, token) => {
     return new Promise((resolve, reject) => {
-        let expire = moment().add(10, "minutes").toISOString();
+        // check if already exists
+        getVerificationToken(userId).then(token => {
+            // delete then create
+            deleteVerificationToken(userId).then(success => {
+                // create token
+                let expire = moment().add(10, "minutes").toISOString();
 
-        const url = `http://localhost:9801/verifyemail/${token}`;
+                const url = `http://localhost:9801/verifyemail/${token}`;
 
-        let query = {
-            name: "addVerificationToken",
-            text: "INSERT INTO verification_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
-            values: [userId, token, expire]
-        };
+                let query = {
+                    name: "addVerificationToken",
+                    text: "INSERT INTO verification_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                    values: [userId, token, expire]
+                };
 
-        DB.query(query).then(response => {
-            if (response.rowCount > 0) {
-                // success
-                resolve(url);
-            } else {
-                reject("Could not add token");
-            }
+                DB.query(query).then(response => {
+                    if (response.rowCount > 0) {
+                        // success
+                        resolve(url);
+                    } else {
+                        reject("Could not add token");
+                    }
+                });
+                // -------------------
+            }, err => {
+                // failed to delete
+                console.error(err);
+                reject("Token already exists, could not delete old token, therefore did not create new token");
+            });
+        }, err => {
+            // if no then create
+            let expire = moment().add(10, "minutes").toISOString();
+
+            const url = `http://localhost:9801/verifyemail/${token}`;
+
+            let query = {
+                name: "addVerificationToken",
+                text: "INSERT INTO verification_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                values: [userId, token, expire]
+            };
+
+            DB.query(query).then(response => {
+                if (response.rowCount > 0) {
+                    // success
+                    resolve(url);
+                } else {
+                    reject("Could not add token");
+                }
+            });
+            // create ---------------------
         });
     });
 };
 
+// get token  by user UUID
 const getVerificationToken = async (userId) => {
     return new Promise((resolve, reject) => {
         let query = {
@@ -825,6 +893,53 @@ const getVerificationToken = async (userId) => {
         });
     });
 };
+
+const checkVerificationToken = async (token) => {
+    return new Promise((resolve, reject) => {
+        let query = {
+            name: "checkVerificationToken",
+            text: "SELECT * FROM verification_tokens WHERE token = $1",
+            values: [token]
+        };
+
+        DB.query(query).then(response => {
+            if (response.rows[0]) {
+                // Checks if token expired only resolves if it hasn't
+                if (hasNotExpired(response.rows[0].expire)) {
+                    resolve(response.rows[0]);
+                } else {
+                    // if token expired delete and reject
+                    deleteVerificationToken(response.rows[0].user_id).then(success => {
+                        reject("Token has expired");
+                    }, err => {
+                        console.error(err);
+                        reject("Token has expired");
+                    });
+                }
+            } else {
+                reject("Token does not exist");
+            }
+        });
+    });
+};
+
+const deleteVerificationToken = async (userId) => {
+    return new Promise((resolve, reject) => {
+        let query = {
+            name: "deleteVerificationToken",
+            text: "DELETE FROM verification_tokens WHERE user_id = $1",
+            values: [userId]
+        };
+
+        DB.query(query).then(response => {
+            resolve(response);
+        }, err => {
+            reject(err);
+        });
+    });
+};
+
+
 
 // Exports
 module.exports = {
@@ -858,5 +973,11 @@ module.exports = {
     addPasswordToken,
     getPasswordToken,
     checkPasswordToken,
-    deletePasswordToken
+    deletePasswordToken,
+
+    // Verification Tokens
+    addVerificationToken,
+    getVerificationToken,
+    checkVerificationToken,
+    deleteVerificationToken
 };

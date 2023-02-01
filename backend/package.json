@@ -1,6 +1,6 @@
 {
   "name": "braindump-backend",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "idea app backend",
   "main": "index.js",
   "scripts": {
