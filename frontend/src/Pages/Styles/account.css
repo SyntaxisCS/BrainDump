@@ -1,0 +1,16 @@
+.accountSettings {
+    height: 100vh;
+    color: #1c1d20;
+    transition: all 0.5s ease;
+    background-color: #ffffff;
+}
+
+.accountSettings.darkTheme {
+    color: #ffffff;
+    background-color: #292b30;
+}
+
+.accountSettings.abyssTheme {
+    color: #ffffff;
+    background-color: #040506;
+}

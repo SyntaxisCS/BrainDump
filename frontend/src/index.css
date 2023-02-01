@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+    cursor: default;
+    color: #1c1d20;
+    background: #ffffff;
+    font-family: "Poppins", sans-serif;
+}
+
+/* Dark Theme */
+
+body.darkTheme {
+    color: #ffffff;
+    background: #292b30;
+}

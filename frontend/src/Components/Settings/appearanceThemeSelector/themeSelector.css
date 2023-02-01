@@ -1,0 +1,54 @@
+.themeSelector {
+    width: 28em;
+    display: grid;
+    margin-left: 20em;
+}
+
+.themeSelector .title {
+    font-weight: 500;
+    margin: 1em 0 0 0.3em;
+}
+
+.themeSelector .themeCards {
+    display: flex;
+}
+
+.themeSelector .themeCards .card {
+    width: 12em;
+    height: 12em;
+    margin-left: 2em;
+    text-align: center;
+    border-radius: 10px;
+    background-color: #f0f1f3;
+}
+
+.themeSelector .themeCards .card:first-of-type {
+    margin-left: 0em;
+}
+
+.themeSelector .themeCards .card h1 {
+    color: #404040;
+    margin: 2em 0 2em 0;
+}
+
+.themeSelector .themeCards .card img {
+    width: 80%;
+    height: 80%;
+    border-radius: 10px;
+    margin:  2.2em 0 0 2em;
+}
+
+.themeSelector .themeCards .card.active {
+    border: 5px solid #0049c6;
+}
+
+/* Dark Theme */
+
+.themeSelector .themeCards .card.darkTheme {
+    background-color: #404040;
+}
+
+/* Abyss Theme */
+.themeSelector .themeCards .card.abyssTheme {
+    background-color: #040506;
+}

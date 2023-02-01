@@ -1,0 +1,147 @@
+.userSignUpForm {
+    width: 25%;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.userSignUpForm .header h1 {
+    font-weight: 700;
+    font-size: 30px;
+}
+
+.userSignUpForm label {
+    color: #c3c3c3;
+}
+
+.userSignUpForm input[type="text"], .userSignUpForm input[type="password"] {
+    width: 100%;
+    margin: 8px 0;
+    display: block;
+    padding: 8px 15px;
+    border-radius: 5px;
+    caret-color: #0049c6;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #c3c3c3;
+    font-family: "Poppins", sans-serif;
+}
+
+.userSignUpForm input[type="text"]:focus, input[type="password"]:focus {
+    border: none;
+    outline: 1px solid #0049a6;
+}
+
+.userSignUpForm .passwordInput {
+    position: relative;
+}
+
+.userSignUpForm .passwordInput i {
+    position: absolute;
+    top: 18px;
+    right: 6px;
+    z-index: 2;
+    cursor: pointer;
+    font-size: 20px;
+    transform: translateX(2px);
+}
+
+.userSignUpForm button[type="submit"] {
+    width: 100%;
+    border: none;
+    margin: 3px 0;
+    color: #ffffff;
+    cursor: pointer;
+    margin-bottom: 0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 17px;
+    font-weight: 300;
+    background-color: #0049c6;
+}
+
+.userSignUpForm button[type="submit"]:hover {
+    background-color: #0049a6;
+}
+
+.userSignUpForm .loginText {
+    color: #c3c3c3;
+    margin-top: 1em;
+    font-size: 13.5px;
+}
+
+.userSignUpForm .loginText a {
+    color: #0049c6;
+    cursor: pointer;
+    margin-left: 0.5em;
+}
+
+.userSignUpForm .errorText {
+    display: block;
+    color: red;
+}
+
+.userSignUpForm .errorText.hidden {
+    display: none;
+}
+
+/* Dark Mode */
+.userSignUpForm .header.darkTheme h1 {
+    color: #9f9f9f
+}
+
+.userSignUpForm.darkTheme input[type="text"], .userSignUpForm.darkTheme input[type="password"] {
+    outline: none;
+    border: none;
+    color: #ffffff;
+    background-color: #1c1d20;
+}
+
+.userSignUpForm.darkTheme input[type="text"]:focus, .userSignUpForm.darkTheme input[type="password"]:focus {
+    border: none;
+    outline: none;
+}
+
+.userSignUpForm label {
+    color: #696969;
+}
+
+.userSignUpForm .forgotText {
+    color: #696969;
+}
+
+.userSignUpForm .loginText.darkTheme {
+    color: #696969;
+}
+
+/* Abyss Theme */
+.userSignUpForm .header.abyssTheme h1 {
+    color: #ffffff;
+}
+
+.userSignUpForm.abyssTheme input[type="text"], .userSignUpForm.abyssTheme input[type="password"] {
+    border: 1px solid #424242;
+    color: #ffffff;
+    background-color: #040506;
+}
+
+.userSignUpForm.abyssTheme input[type="text"]:focus, input[type="password"]:focus {
+    border: 1px solid #b1b0b3;
+    outline: none;
+}
+
+.userSignUpForm .passwordInput i.bx-show-alt {
+    color: #ffffff;
+}
+
+.userSignUpForm label {
+    color: #696969;
+}
+
+.userSignUpForm .forgotText.abyssTheme {
+    color: #696969;
+}
+
+.userSignUpForm .loginText.abyssTheme {
+    color: #bcbcbd;
+}

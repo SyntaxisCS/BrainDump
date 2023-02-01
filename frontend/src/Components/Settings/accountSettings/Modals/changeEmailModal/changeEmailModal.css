@@ -1,0 +1,48 @@
+.changeEmailModal.show {
+    top: 25%;
+    left: 25%;
+    z-index: 2;
+    width: 50%;
+    height: 30%;
+    color: #333;
+    padding: 2em;
+    display: block;
+    position: absolute;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background-color: #fff;
+}
+
+.changeEmailModal.hidden {
+    display: none;
+}
+
+.changeEmailModal.show .closeButton {
+    top: 1em;
+    right: 1em;
+    padding: 0;
+    position: absolute;
+    background: none !important;
+}
+
+.changeEmailModal.show .form .errorText {
+    margin: 0;
+    color: red;
+    display: block;
+}
+
+.changeEmailModal.show .form .errorText.hidden {
+    display: none;
+}
+
+/* Dark Mode */
+
+.changeEmailModal.show.darkTheme {
+    color: #fff;
+    background-color: #333;
+}
+
+.changeEmailModal.show.abyssTheme {
+    color: #fff;
+    background-color: #000;
+}

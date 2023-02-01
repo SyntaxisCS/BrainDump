@@ -1,0 +1,124 @@
+.sideBar {
+    position: fixed;
+    height: 100vh;
+    width: 18em;
+    background-color: #f1f2f6;
+    transition: all 0.5s ease;
+}
+
+.sideBar .navLinks {
+    margin-top: 10px;
+    padding: 25px;
+}
+
+.sideBar .navLinks li {
+    position: relative;
+    list-style: none;
+    height: 50px;
+}
+
+.sideBar .navLinks li a {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    cursor: pointer;
+    color: #1c1d20;
+    border-radius: 10px;
+    align-items: center;
+    text-decoration: none;
+    transition: all 0.4s ease;
+}
+
+.sideBar .navLinks li a.active {
+    color: #ffffff;
+    background-color: #0049c6;
+}
+
+.sideBar .navLinks li a i {
+    margin-left: 0.5em;
+    font-size: 20px;
+}
+
+.sideBar .navLinks li a span {
+    margin-left: 0.5em;
+}
+
+.sideBar .navLinks .returnBtn {
+    bottom: 1em;
+    background-color: none;
+    position: absolute;
+}
+
+.sideBar .navLinks .returnBtn:hover {
+    background-color: none;
+}
+
+.sideBar .navLinks .returnBtn a {
+    color: #1c1d20;
+}
+
+.sideBar .navLinks .returnBtn a:hover {
+    background-color: #f1f2f6;
+}
+
+.sideBar .navLinks li a:hover {
+    background-color: #e7e7e7;
+}
+
+.sideBar .navLinks li a.active:hover {
+    cursor: default;
+    background-color: #0049c6;
+}
+
+/* DarkTheme */
+.sideBar.darkTheme {
+    background-color: #242424;
+}
+
+.sideBar .navLinks li a.darkTheme {
+    color: #ffffff;
+}
+
+.sideBar .navLinks li a.darkTheme:hover {
+    background-color: #1c1d20;
+}
+
+.sideBar .navLinks li a.active.darkTheme:hover {
+    cursor: default;
+    background-color: #0049c6;
+}
+
+.sideBar .navLinks .returnBtn.darkTheme a:hover {
+    background-color: #242424;
+}
+
+.sideBar .navLinks .returnBtn.darkTheme a {
+    color: #ffffff;
+}
+
+/* Abyss Theme */
+.sideBar.abyssTheme {
+    background-color: #040506;
+    border-right: 1px solid #424242;
+}
+
+.sideBar .navLinks li a.abyssTheme {
+    color: #ffffff;
+}
+
+.sideBar .navLinks li a.abyssTheme:hover {
+    background-color: #1c1d20;
+}
+
+.sideBar .navLinks li a.active.abyssTheme:hover {
+    cursor: default;
+    background-color: #0049c6;
+}
+
+.sideBar .navLinks .returnBtn.abyssTheme a:hover {
+    background-color: #040506;
+}
+
+.sideBar .navLinks .returnBtn.abyssTheme a {
+    color: #ffffff;
+}

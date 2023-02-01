@@ -1,0 +1,13 @@
+.signUpPage {
+    height: 100vh;
+}
+
+/* Dark Theme */
+.signUpPage.darkTheme {
+    background-color: #292b30;
+}
+
+/* Abyss Theme */
+.signUpPage.abyssTheme {
+    background-color: #040506;
+}

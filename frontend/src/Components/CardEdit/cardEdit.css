@@ -1,0 +1,128 @@
+.cardEditTemplate {
+    top: 10%;
+    width: 25%;
+    height: 15%;
+    display: flex;
+    transition: 0.5s;
+    position: absolute;
+}
+
+.cardEditTemplate .textBoxContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.cardEditTemplate .textBoxInput {
+    width: 100%;
+    height: 200%;
+    border: none;
+    resize: none;
+    outline:none;
+    padding: 10px;
+    font-size: 18px;
+    transition: 0.5s;
+    border-radius: 10px;
+    white-space: pre-line;
+    caret-color: #0049c6;
+    font-family: "Poppins", sans-serif;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.cardEditTemplate .textBoxInput::-webkit-scrollbar {
+    display: none;
+}
+
+.cardEditTemplate .remaining {
+    left: 1em;
+    bottom: 2em;
+    display: flex;
+    position: relative;
+    flex-direction: row-reverse;
+}
+
+.cardEditTemplate .remaining .characters {
+    margin: 0;
+    padding: 0;
+    color: #808291;
+}
+
+.cardEditTemplate .circleProgress {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    margin-left: 5px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#0049c6, 360deg, #fff 0deg);
+}
+
+.cardEditTemplate .circleProgress::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.cardEditTemplate .saveButton {
+    border: none;
+    color: #808291;
+    margin-right: 0.1em;
+    font-size: 20px;
+    background: none;
+    border-radius: 25%;
+}
+
+.cardEditTemplate .saveButton:hover {
+    background: #2a2a2e;
+}
+
+.cardEditTemplate .deleteButton {
+    border: none;
+    color: #808291;
+    font-size: 20px;
+    background: none;
+    border-radius: 25%;
+}
+
+.cardEditTemplate .deleteButton:hover {
+    background: #2a2a2a;
+}
+
+/*Dark Mode*/
+.cardEditTemplate .textBoxInput.darkTheme {
+    color: #ffffff;
+    box-shadow: none;
+    background-color: #1c1d20;
+}
+
+.cardEditTemplate .circleProgress.darkTheme::before {
+    background-color: #1c1d20;
+}
+
+/* Abyss Theme */
+.cardEditTemplate .textBoxInput.abyssTheme {
+    color: #ffffff;
+    box-shadow: none;
+    border: 1px solid #424242;
+    background-color: #040506;
+}
+
+.cardEditTemplate .circleProgress.abyssTheme::before {
+    background-color: #040506;
+}
+
+/* Responsive */
+@media only screen and (max-width: 730px) {
+    .cardEditTemplate {
+        width: 50%;
+        transition: 0.5s;
+    }
+
+    .cardEditTemplate .textBoxInput {
+        height: 50%;
+    }
+}

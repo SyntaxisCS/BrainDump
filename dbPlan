@@ -1,0 +1,9 @@
+password_tokens - forgot password tokens
+verification_tokens - email verification tokens
+email_tokens - email change tokens
+
+each 1 per user (user_id used as primary key, when writing new token check for existing token for user and delete and write new token)
+
+tokens have expiry. Timed purge every sunday @ 2am?
+get all tokens, check expiry data with forEach and if expired at user_id of token to be deleted to array to delete after forEach
+(this functionality is not as important to functionality to get everything else working first)

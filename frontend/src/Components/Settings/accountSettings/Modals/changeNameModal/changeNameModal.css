@@ -1,0 +1,66 @@
+.changeNameModal.show {
+    top: 25%;
+    left: 25%;
+    z-index: 2;
+    width: 50%;
+    height: 30%;
+    color: #333;
+    padding: 2em;
+    display: block;
+    position: absolute;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background-color: #fff;
+}
+
+.changeNameModal.show input[type="text"] {
+    width: 100%;
+    margin: 8px 0;
+    display: block;
+    padding: 8px 15px;
+    border-radius: 5px;
+    caret-color: #0049c6;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #c3c3c3;
+    font-family: "Poppins", sans-serif;
+}
+
+.changeNameModal.hidden {
+    display: none;
+}
+
+.changeNameModal.show .closeButton {
+    top: 1em;
+    right: 1em;
+    padding: 0;
+    position: absolute;
+    background-color: ;
+    background: none !important;
+}
+
+.changeNameModal.show .form .submitButton {
+    width: 100%;
+}
+
+.changeNameModal.show .form .errorText {
+    margin: 0;
+    color: red;
+    display: block;
+}
+
+.changeNameModal.show .form .errorText.hidden {
+    display: none;
+}
+
+/* Dark Mode */
+
+.changeNameModal.show.darkTheme {
+    color: #fff;
+    background-color: #333;
+}
+
+.changeNameModal.show.abyssTheme {
+    color: #fff;
+    background-color: #000;
+}

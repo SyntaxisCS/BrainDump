@@ -1,0 +1,13 @@
+.loginPage {
+    height: 100vh;
+}
+
+/* Dark Theme */
+.loginPage.darkTheme {
+    background-color: #292b30;
+}
+
+/* Abyss Theme */
+.loginPage.abyssTheme {
+    background-color: #040506;
+}
