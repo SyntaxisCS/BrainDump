@@ -9,10 +9,10 @@ const aes256 = require("aes256");
 const {generateNoteId, generateToken} = require("../../Utils/nanoIdGenerator");
 const { deriveKey, encryptKey, decryptKey } = require("../../Utils/keyHandling");
 const { hasNotExpired } = require("../../Utils/timeHandling");
+const { sendEmailVerificationLink } = require("../email/emailHandler");
 
 // Dotenv
 const path = require("path");
-const { sendEmailVerificationLink } = require("../email/emailHandler");
 require("dotenv").config({path: path.resolve(__dirname, "../../.env")});
 
 // Database setup
@@ -308,6 +308,30 @@ const verifyEmail = async (email) => {
             } else {
                 // email already verified
                 reject(`${user.uuid} has already verified the email ${email} on ${user.email_verified_date ? user.email_verified_date : "an unknown date and time"}`);
+            }
+
+        }, err => {
+            console.error(err);
+            reject("User does not exist");
+        });
+    });
+};
+
+const isVerified = async (email) => {
+    return new Promise((resolve, reject) => {
+        getUserByEmail(email).then(user => {
+            
+            // Check Verification Status
+            if (user.email_verified) {
+                resolve({
+                    verified: true,
+                    verifiedDate: user.email_verified_date
+                });
+            } else {
+                resolve({
+                    verified: false,
+                    verifiedDate: null
+                });
             }
 
         }, err => {
@@ -993,6 +1017,7 @@ module.exports = {
     changeUserPassword, 
     changeUserEmail,
     verifyEmail,
+    isVerified,
     authenticate,
     
     // Notes

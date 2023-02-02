@@ -8,26 +8,13 @@ const passport = require("passport");
 // Router initialization
 const users = express.Router();
 
-// Email
-const nodeMailer = require("nodemailer");
-
 // Database Handlers
-const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail} = require("./database/dbHandler");
+const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail, isVerified} = require("./database/dbHandler");
 
 // Helpers
 const {generateUUID} = require("../Utils/uuidGenerator");
 const { generateToken } = require("../Utils/nanoIdGenerator");
-const { sendForgotPasswordLink } = require("./email/emailHandler");
-
-// Email Transporter
-let transporter = nodeMailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'gia.konopelski6@ethereal.email',
-        pass: 'mp7XDyP1t422agt4g7'
-    }
-});
+const { sendForgotPasswordLink, sendEmailVerificationLink } = require("./email/emailHandler");
 
 // Middleware
 const ensureAuthentication = (req, res, next) => {
@@ -410,6 +397,29 @@ user.post("/verifyemail", emailLimiter, (req, res) => {
 users.post("/generateemailverificationlink", emailLimiter, (req, res) => {
     if (req.body.email) {
         // is verified db handler
+        isVerified(req.body.email).then(verified => {
+            // Check if verified
+            if (verified.verified) {
+                res.status(204).send("User already verified");
+            } else {
+                sendEmailVerificationLink(req.body.email).then(success => {
+                    res.status(200).send(success);
+                }, err => {
+                    if (err === "Could not send email") {
+                        res.status(500).send({error: err});
+                    } else if (err === "Recipient not provided") {
+                        res.status(400).send({error: err});
+                    } else {
+                        res.status(500).send({error: "Server Error. Try Again Later"});
+                    }
+                });
+            }
+
+        }, err => {
+            res.status(400).send({error: err});
+        });
+    } else {
+        res.status(400).send({error: "Email not provided"});
     }
 });
 
