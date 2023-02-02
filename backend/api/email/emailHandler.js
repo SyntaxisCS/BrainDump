@@ -1,0 +1,141 @@
+const nodeMailer = require("nodemailer");
+
+// helper functions
+const { generateToken } = require("../../Utils/nanoIdGenerator");
+const { getUserByEmail, addVerificationToken } = require("../database/dbHandler");
+
+const emailSender = "gia.konopelski6@ethereal.email";
+let transporter = nodeMailer.createTransport({
+    host: "smtp.ethereal.email",
+    port: 587,
+    auth: {
+        user: emailSender,
+        pass: 'mp7XDyP1t422agt4g7'
+    }
+});
+
+// Send Account Creation Notification
+const sendAccountCreationNotification = async (recipient) => {
+    return new Promise((resolve, reject) => {
+        if (recipient) {
+
+            // Create Email Options
+            const mailOptions = {
+                from: emailSender,
+                to: recipient,
+                subject: "Thanks for joining BrainDump",
+                html: ``
+            };
+
+            // Send Email
+            transporter.sendMail(mailOptions).then(info => {
+                resolve("Email sent");
+            }, err => {
+                console.error(err);
+                reject("Could not send email");
+            });
+
+        } else {
+            reject("Recipient not provided");
+        }
+    });
+};
+
+// Password Change Notification
+const sendPasswordChangeNotification = async (recipient) => {
+    return new Promise((resolve, reject) => {
+        if (recipient) {
+
+            // Create Email Options
+            const mailOptions = {
+                from: emailSender,
+                to: recipient,
+                subject: "Your BrainDump Password has been changed",
+                html: ``
+                // Include link to frontend /forgotpassword form
+            };
+
+            // Send Email
+            transporter.sendMail(mailOptions).then(info => {
+                resolve("Email sent");
+            }, err => {
+                console.error(err);
+                reject("Could not send email");
+            });
+
+        } else {
+            reject("Recipient not provided");
+        }
+    }); 
+};
+
+// Send Forgot Password Link
+const sendForgotPasswordLink = async (recipient, url) => {
+    return new Promise((resolve, reject) => {
+        if (recipient && url) {
+
+            // Create Email Options
+            const mailOptions = {
+                from: emailSender,
+                to: recipient,
+                subject: "Your BrainDump password reset link has arrived!",
+                html: `<body style="background-color:#040506;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%"><div class="preheader" style="display:none;max-width:0;max-height:0;overflow:hidden;font-size:1px;line-height:1px;color:#040506;opacity:0">A preheader is the short summary text that follows the subject line when an email is viewed in the inbox.</div><table border="0" cellpadding="0" cellspacing="0" width="100%" style="mso-table-rspace:0;mso-table-lspace:0"><tr><td align="center" bgcolor="#040506"><table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px"><tr><td align="center" valign="top" style="padding:36px 24px"></td></tr></table></td></tr><tr><td align="center" bgcolor="#040506"><table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px"><tr><td bgcolor="#ffffff" align="left"></td></tr></table></td></tr><tr><td align="center" bgcolor="#040506"><table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;mso-table-rspace:0;mso-table-lspace:0"><tr><td bgcolor="#ffffff" align="left" style="padding:24px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:16px;line-height:24px"><h1 style="margin:0 0 12px;font-size:32px;font-weight:400;line-height:48px">Reset Your Password</h1><p style="margin:0">Click the button below to reset your account password. If you did not make this request you can safely delete this email. Receiving a request does not mean someone has access to your account.</p></td></tr><tr><td align="left" bgcolor="#ffffff"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" bgcolor="#ffffff" style="padding:12px"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="left" bgcolor="#ffffff"><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" bgcolor="#ffffff" style="padding:12px"><table border="0" cellpadding="0" cellspacing="0"><tr><td align="center" bgcolor="#2952c4" style="border-radius:6px"><a href="${url}" target="_blank" style="display:inline-block;padding:16px 36px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:16px;color:#fff;text-decoration:none;border-radius:6px">Password Reset</a></td></tr></table></td></tr></table></td></tr><td align="left" bgcolor="#ffffff" style="padding:24px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:16px;line-height:24px"><p style="margin:0">If that doesn't work, copy and paste the following link in your browser:</p><p style="margin:0">${url}</p></td></tr></table></td></tr></table></td></tr><tr><td align="left" bgcolor="#ffffff" style="padding:24px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:16px;line-height:24px;border-bottom:3px solid #d4dadf"><p style="margin:0"><br>BrainDump</p></td></tr></table><tr><td align="center" bgcolor="#040506" style="padding:24px"><table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px"><tr><td align="center" bgcolor="#040506" style="padding:12px 24px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:14px;line-height:20px;color:#666"><p style="margin:0">You received this email because a password request was made for this email. If you did not make this request then you can safely delete this email. Receiving a password request does not mean someone has access to your account.</p></td></tr><tr><td align="center" bgcolor="#040506" style="padding:12px 24px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;font-size:14px;line-height:20px;color:#666"><p style="margin:0">braindump.net</p></td></tr></table></td></tr></body>`
+            };
+
+            // Send Email
+            transporter.sendMail(mailOptions).then(info => {
+                resolve("Email sent");
+            }, err => {
+                console.error(err);
+                reject("Could not send email");
+            });
+
+        } else {
+            reject("Recipient or url not provided");
+        }
+    });
+};
+
+// Send Email Verification Link
+const sendEmailVerificationLink = async (recipient) => {
+    return new Promise((resolve, reject) => {
+        let verificationToken = generateToken();
+
+        if (recipient) {
+            getUserByEmail(recipient).then(user => {
+                addVerificationToken(user.uuid, verificationToken).then(url => {
+                    
+                    // Create Email Options
+                    const mailOptions = {
+                        from: emailSender,
+                        to: recipient,
+                        subject: "Please Verify your BrainDump email!",
+                        html: ``
+                    };
+
+                    // Send Email
+                    transporter.sendMail(mailOptions).then(info => {
+                        resolve(`Email send to ${recipient}`);
+                    }, err => {
+                        console.error(err);
+                        reject("Could not send email");
+                    });
+
+                }, err => {
+                    reject(err);
+                });
+            }, err => {
+                reject(err);
+            });
+        } else {
+            reject("Recipient not provided");
+        }
+    });
+};
+
+module.exports = {
+    sendAccountCreationNotification,
+    sendPasswordChangeNotification,
+    sendForgotPasswordLink,
+    sendEmailVerificationLink
+};

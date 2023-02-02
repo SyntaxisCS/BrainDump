@@ -12,6 +12,7 @@ const { hasNotExpired } = require("../../Utils/timeHandling");
 
 // Dotenv
 const path = require("path");
+const { sendEmailVerificationLink } = require("../email/emailHandler");
 require("dotenv").config({path: path.resolve(__dirname, "../../.env")});
 
 // Database setup
@@ -152,9 +153,12 @@ const createUser = async (newUser) => {
                             values: [newUser.uuid, newUser.name, normalizedEmail, hashedPassword, newUser.userType, newUser.planType, newUser.verifyEmail, newUser.emailVerifyDate, newUser.dateJoined]
                         };
                         DB.query(query).then(response => {
-                            resolve(response);
 
-                            // handleEmailVerification
+                            sendEmailVerificationLink(normalizedEmail).then(success => {
+                                resolve(response);
+                            }, err => {
+                                reject(err);
+                            });
 
                         }, err => {
                             reject(err);
