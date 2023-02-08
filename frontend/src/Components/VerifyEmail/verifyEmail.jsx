@@ -2,12 +2,14 @@ const React = require("react");
 const axios = require("axios");
 
 // Components
+const {useNavigate} = require("react-router-dom");
 import { useTheme } from "../../Utils/Themes/theme";
 import "./verifyEmail.css";
 
 export const VerifyEmailComponent = (props) => {
     const theme = useTheme();
     const token = props.token;
+    const navigate = useNavigate();
 
     // States
     const [statusState, setStatusState] = React.useState(true);
@@ -42,7 +44,6 @@ export const VerifyEmailComponent = (props) => {
         }).then(response => {
             changeStatus("good");
         }, err => {
-            console.log(err);
             let errResponse = err.response;
 
             if (errResponse.status === 400) {
@@ -50,6 +51,8 @@ export const VerifyEmailComponent = (props) => {
                     changeStatus("done");
                 } else if (errResponse.data.error === "Token has expired") {
                     changeStatus("bad");
+                } else if (errResponse.data.error === "Token does not exist") {
+                    navigate("/");
                 }
             } else {
                 changeStatus("bad");

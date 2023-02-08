@@ -159,12 +159,31 @@ users.post("/create", (req, res) => {
 
     // Database
     createUser(userObject).then(success => {
+        // redact password
         userObject.password = "server redacted";
-        sendAccountCreationNotification(userObject.email).then(success => {
-            res.status(201).send(userObject);
+
+        //
+        sendEmailVerificationLink(userObject.email).then(sent => {
+
+            sendAccountCreationNotification(userObject.email).then(success => {
+                res.status(201).send(userObject);
+            }, err => {
+                res.status(500).send({error: "Account Created, Could not send email"});
+            });
+
         }, err => {
-            res.status(500).send({error: "Account Created, Could not send email"});
+            if (err === "Recipient not provided") {
+                console.error(`User.js /create: ${err}`);
+                res.status(500).send({error: "Server error"});
+            } else if (err === "Could not send email") {
+                console.error(err);
+                res.status(500).send({error: err});
+            } else {
+                console.error(err);
+                res.status(500).send({error: "Server error"});
+            }
         });
+
     }, err => {
         console.error(err);
         if (err === "user already exists") {

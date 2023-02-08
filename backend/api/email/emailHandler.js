@@ -4,13 +4,13 @@ const nodeMailer = require("nodemailer");
 const { generateToken } = require("../../Utils/nanoIdGenerator");
 const { getUserByEmail, addVerificationToken } = require("../database/dbHandler");
 
-const emailSender = "gia.konopelski6@ethereal.email";
+const emailSender = "kellen67@ethereal.email";
 let transporter = nodeMailer.createTransport({
     host: "smtp.ethereal.email",
     port: 587,
     auth: {
         user: emailSender,
-        pass: 'mp7XDyP1t422agt4g7'
+        pass: 'MPwRwdJ3qEyU8qXz3V'
     }
 });
 
@@ -115,7 +115,7 @@ const sendEmailVerificationLink = async (recipient) => {
 
                     // Send Email
                     transporter.sendMail(mailOptions).then(info => {
-                        resolve(`Email send to ${recipient}`);
+                        resolve(`Email sent to ${recipient}`);
                     }, err => {
                         console.error(err);
                         reject("Could not send email");

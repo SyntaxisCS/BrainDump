@@ -9,7 +9,6 @@ const aes256 = require("aes256");
 const {generateNoteId} = require("../../Utils/nanoIdGenerator");
 const { deriveKey, encryptKey, decryptKey } = require("../../Utils/keyHandling");
 const { hasNotExpired } = require("../../Utils/timeHandling");
-const { sendEmailVerificationLink } = require("../email/emailHandler");
 
 // Dotenv
 const path = require("path");
@@ -154,11 +153,12 @@ const createUser = async (newUser) => {
                         };
                         DB.query(query).then(response => {
 
-                            sendEmailVerificationLink(normalizedEmail).then(success => {
-                                resolve(response);
-                            }, err => {
-                                reject(err);
-                            });
+                            if (response.rowCount > 0) {
+                                // success
+                                resolve(newUser);
+                            } else {
+                                reject("Could not create user");
+                            }
 
                         }, err => {
                             reject(err);
