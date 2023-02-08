@@ -1,0 +1,36 @@
+.verifyEmail {
+    width: 50%;
+    margin: auto;
+    display: flex;
+    margin-top: 10%;
+    text-align: center;
+    flex-direction: column;
+}
+
+.verifyEmail .status {
+    font-size: 100px;
+    margin-bottom: -5px;
+}
+
+.verifyEmail .statusMessage {
+    font-size: 20px;
+    width: 100%;
+}
+
+.verifyEmail .status.good {
+    color: #04dba8;
+}
+
+.verifyEmail .status.bad {
+    color: #B00020;
+}
+
+/* Dark Theme */
+.verifyEmail.darkTheme {
+    color: #ffffff;
+}
+
+/* Abyss Theme */
+.verifyEmail.abyssTheme {
+    color: #ffffff;
+}

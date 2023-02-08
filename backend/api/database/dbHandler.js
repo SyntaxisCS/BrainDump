@@ -6,7 +6,7 @@ const moment = require("moment");
 
 // Helper functions
 const aes256 = require("aes256");
-const {generateNoteId, generateToken} = require("../../Utils/nanoIdGenerator");
+const {generateNoteId} = require("../../Utils/nanoIdGenerator");
 const { deriveKey, encryptKey, decryptKey } = require("../../Utils/keyHandling");
 const { hasNotExpired } = require("../../Utils/timeHandling");
 const { sendEmailVerificationLink } = require("../email/emailHandler");
@@ -1026,7 +1026,7 @@ module.exports = {
     createNote,
     deleteNote,
     deleteAllNotes,
-    updateAllNoteEncryption, // Password change
+    updateAllNoteEncryption, // Called during user password change
     updateNote,
 
     // Keys

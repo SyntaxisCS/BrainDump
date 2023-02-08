@@ -1,0 +1,16 @@
+.verifyEmailPage {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dark Theme */
+.verifyEmailPage.darkTheme {
+    background-color: #292b30;
+}
+
+/* Abyss Theme */
+.verifyEmailPage.abyssTheme {
+    background-color: #040506;
+}

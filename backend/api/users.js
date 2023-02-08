@@ -14,7 +14,7 @@ const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, chang
 // Helpers
 const {generateUUID} = require("../Utils/uuidGenerator");
 const { generateToken } = require("../Utils/nanoIdGenerator");
-const { sendForgotPasswordLink, sendEmailVerificationLink } = require("./email/emailHandler");
+const { sendForgotPasswordLink, sendEmailVerificationLink, sendAccountCreationNotification, sendPasswordChangeNotification } = require("./email/emailHandler");
 
 // Middleware
 const ensureAuthentication = (req, res, next) => {
@@ -160,7 +160,11 @@ users.post("/create", (req, res) => {
     // Database
     createUser(userObject).then(success => {
         userObject.password = "server redacted";
-        res.status(201).send(userObject);
+        sendAccountCreationNotification(userObject.email).then(success => {
+            res.status(201).send(userObject);
+        }, err => {
+            res.status(500).send({error: "Account Created, Could not send email"});
+        });
     }, err => {
         console.error(err);
         if (err === "user already exists") {
@@ -256,7 +260,15 @@ users.post("/changepassword", ensureAuthentication, (req, res) => {
         
         // Change password
         changeUserPassword(req.session.user.email, req.body.newPassword).then(response => {
-            res.send("Password changed");
+            
+            // Send email
+            sendPasswordChangeNotification(req.session.user.email).then(success => {
+                // Send api response on success
+                res.send("Password changed");
+            }, err => {
+                res.status(500).send({error: err});
+            });
+
         }, err => {
             if (err === "Passwords cannot match") {
                 res.status(400).send({error: "Your password can not be the same"});
@@ -358,7 +370,7 @@ users.post("/changeemail", ensureAuthentication, (req, res) => {
     });
 });
 
-user.post("/verifyemail", emailLimiter, (req, res) => {
+users.post("/verifyemail", emailLimiter, (req, res) => {
     /* req.body.token */
 
     if (req.body.token) {

@@ -17,6 +17,7 @@ import {CardEditPage} from "./Pages/cardEditPage";
 import {SignUpPage} from "./Pages/SignUpPage";
 import { ForgotPasswordRequestPage } from "./Pages/ForgotPasswordRequestPage";
 import { ForgotPasswordChangePage } from "./Pages/forgotPasswordChangePage";
+import { VerifyEmailPage } from "./Pages/verifyEmailPage.jsx";
 
 ReactDOM.render((
     <AuthProvider>
@@ -38,6 +39,9 @@ ReactDOM.render((
                         {/*Forgot Password*/}
                         <Route path="/forgotpassword" element={<ForgotPasswordRequestPage/>}/>
                         <Route path="/forgotpassword/:token" element={<ForgotPasswordChangePage/>}/>
+
+                        {/*Verify Email*/}
+                        <Route path="/verify/:token" element={<VerifyEmailPage/>}/>
                     </Routes>
                 </BrowserRouter>
             </NotificationProvider>

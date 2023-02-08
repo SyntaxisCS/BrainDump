@@ -63,10 +63,8 @@ export const ForgotPasswordChange = (props) => {
             },
             withCredentials: true
         }).then(response => {
-            console.log(response);
             setFormSucceed(response.data);
         }, err => {
-            console.log(err);
             let errResponse = err.response;
 
             if (errResponse.status === 400) {
