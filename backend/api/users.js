@@ -9,12 +9,12 @@ const passport = require("passport");
 const users = express.Router();
 
 // Database Handlers
-const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail, isVerified} = require("./database/dbHandler");
+const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail, isVerified, checkEmailChangeToken, deleteEmailChangeToken} = require("./database/dbHandler");
 
 // Helpers
 const {generateUUID} = require("../Utils/uuidGenerator");
 const { generateToken } = require("../Utils/nanoIdGenerator");
-const { sendForgotPasswordLink, sendEmailVerificationLink, sendAccountCreationNotification, sendPasswordChangeNotification } = require("./email/emailHandler");
+const { sendForgotPasswordLink, sendEmailVerificationLink, sendAccountCreationNotification, sendPasswordChangeNotification, sendEmailChangeLink, sendEmailChangeNotification } = require("./email/emailHandler");
 
 // Middleware
 const ensureAuthentication = (req, res, next) => {
@@ -392,19 +392,93 @@ users.post("/forgotpassword", forgotPasswordLimiter, (req, res) => {
 
 // Change Email
 users.post("/changeemail", ensureAuthentication, (req, res) => {
-    changeUserEmail(req.session.user.email, req.body.newEmail).then(response => {
-        res.send("Email changed");
-    }, err => {
-        if (err === "Emails cannot match") {
-            res.status(400).send({error: "Your email can not be the same"});
+    
+    if (req.body.token && req.body.email) {
+
+        // Check Token Validity
+        checkEmailChangeToken(req.body.token).then(good => {
+
+            // token is validated and not expired. Get user
+            getUserByUUID(good.user_id).then(user => {
+
+                // change email
+                changeUserEmail(user.email, req.body.email).then(success => {
+
+                    // delete token
+                    deleteEmailChangeToken(user.uuid).then(good => {
+
+                        // send email
+                        sendEmailChangeNotification(user.email, req.body.email).then(good => {
+                            res.status(201).send(`Email changed for user`);
+                        }, err => {
+                            res.status(500).send("Email Changed but could not send emails");
+                        });
+
+                    }, err => {
+                        res.status(500).send({error: "Could not delete token"});
+                    });
+
+                }, err => {
+
+                });
+
+            }, err => {
+                console.error(err);
+                res.status(500).send({error: "Could not change email"});
+            });
+
+        }, err => {
+            
+            // either token does not exist or has expired. Error Handling
+            if (err === "Token has expired") {
+                res.status(400).send({error: "Token has expired"});
+            } else if (err === "Token does not exist") {
+                res.status(400).send({error: "Token does not exist"});
+            } else {
+                console.error(err);
+                res.status(500).send({error: "Server Error"});
+            }
+            
+        });
+
+    }
+
+    // do not do anything if token and email are not provided
+
+});
+
+users.post("/generateemailchangelink", ensureAuthentication, (req, res) => {
+    
+    isVerified(req.session.user.email).then(verified => {
+        // Check if verified
+        if (verified.verified) {
+
+            // Send Email
+            sendEmailChangeLink(req.session.user.email).then(success => {
+                res.status(200).send(success);
+            }, err => {
+                
+                if (err === "Could not send email") {
+                    res.status(500).send({error: err});
+                } else if (err === "Recipient not provided") {
+                    res.status(400).send({error: err});
+                } else {
+                    res.status(500).send({error: "Server Error. Try Again Later"});
+                }
+
+            });
+
         } else {
-            res.status(500).send({error: "Could not change email. Please try again later"});
+            res.status(403).send({error: "You must have a verified email to request an email change"});
         }
+
+    }, err => {
+        res.status(400).send({error: err});
     });
+
 });
 
 users.post("/verifyemail", emailLimiter, (req, res) => {
-    /* req.body.token */
 
     if (req.body.token) {
         checkVerificationToken(req.body.token).then(good => {

@@ -918,12 +918,14 @@ const addVerificationToken = async (userId, token) => {
 
             const url = `http://localhost:9801/verify/${token}`;
 
+            // DB query
             let query = {
                 name: "addVerificationToken",
                 text: "INSERT INTO verification_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
                 values: [userId, token, expire]
             };
 
+            // Make query
             DB.query(query).then(response => {
                 if (response.rowCount > 0) {
                     // success
@@ -931,6 +933,9 @@ const addVerificationToken = async (userId, token) => {
                 } else {
                     reject("Could not add token");
                 }
+            }, err => {
+                console.error(err);
+                reject(err);
             });
             // create ---------------------
         });
@@ -983,6 +988,8 @@ const checkVerificationToken = async (token) => {
             } else {
                 reject("Token does not exist");
             }
+        }, err => {
+            reject(err);
         });
     });
 };
@@ -1003,6 +1010,118 @@ const deleteVerificationToken = async (userId) => {
     });
 };
 
+// Email Change Tokens
+const addEmailChangeToken = async (userId, token) => {
+    return new Promise((resolve, reject) => {
+        // check if already exists
+        getEmailChangeToken(userId).then(oldToken => {
+
+        }, err => {
+            // if no then create
+            let expire = moment().add(10, "minutes").toISOString();
+
+            const url = `http://localhost:9801/changeemail/${token}`;
+
+            // DB query
+            let query = {
+                name: "addEmailChangeToken",
+                text: "INSERT INTO email_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                values: [userId, token, expire]
+            };
+
+            // Make query
+            DB.query(query).then(response => {
+                
+                if (response.rowCount > 0) {
+                    // success
+                    resolve(url);
+                } else {
+                    reject("Could not add token");
+                }
+
+            }, err => {
+                console.error(err);
+                reject(err);
+            });
+
+        });
+    });
+};
+
+const getEmailChangeToken = async (userId) => {
+    return new Promise((resolve, reject) => {
+        let query = {
+            name: "getEmailChangeToken",
+            text: "SELECT * FROM email_tokens WHERE user_id = $1",
+            values: [userId]
+        };
+
+        DB.query(query).then(response => {
+            if (response.rows[0]) {
+                resolve(response.rows[0]);
+            } else {
+                reject("Token does not exist");
+            }
+        }, err => {
+            reject(err);
+        });
+    });
+};
+
+const checkEmailChangeToken = async (token) => {
+    return new Promise((resolve, reject) => {
+        let query = {
+            name: "checkEmailChangeToken",
+            text: "SELECT * FROM email_tokens WHERE token = $1",
+            values: [token]
+        };
+
+        DB.query(query).then(response => {
+
+            // Check response
+            if (response.rows[0]) {
+
+                // Checks if token expired only resolves if it hasn't
+                if (hasNotExpired(response.rows[0].expire)) {
+                    
+                    // Has not expired. Resolve
+                    resolve(response.rows[0]);
+
+                } else {
+                    // if token expired delete and reject
+                    deleteEmailChangeToken(response.rows[0].user_id).then(success => {
+                        reject("Token has expired");
+                    }, err => {
+                        console.error(err);
+                        reject("Token has expired");
+                    });
+                }
+
+            } else {
+                reject("Token does not exist");
+            }
+
+        }, err => {
+            reject(err);
+        });
+    });
+};
+
+const deleteEmailChangeToken = async (userId) => {
+    return new Promise((resolve, reject) => {
+        let query = {
+            name: "deleteEmailChangeToken",
+            text: "DELETE FROM email_tokens WHERE user_id = $1",
+            values: [userId]
+        };
+
+        DB.query(query).then(response => {
+            resolve(response);
+        }, err => {
+            reject(err);
+        });
+    });
+};
 
 
 // Exports
@@ -1045,5 +1164,11 @@ module.exports = {
     addVerificationToken,
     getVerificationToken,
     checkVerificationToken,
-    deleteVerificationToken
+    deleteVerificationToken,
+
+    // Email Change Tokens
+    addEmailChangeToken,
+    getEmailChangeToken,
+    checkEmailChangeToken,
+    deleteEmailChangeToken
 };
