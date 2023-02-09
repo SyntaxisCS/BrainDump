@@ -890,7 +890,7 @@ const addVerificationToken = async (userId, token) => {
                 // create token
                 let expire = moment().add(10, "minutes").toISOString();
 
-                const url = `http://localhost:9801/verifyemail/${token}`;
+                const url = `http://localhost:9801/verify/${token}`;
 
                 let query = {
                     name: "addVerificationToken",
@@ -915,8 +915,8 @@ const addVerificationToken = async (userId, token) => {
         }, err => {
             // if no then create
             let expire = moment().add(10, "minutes").toISOString();
-
-            const url = `http://localhost:9801/verifyemail/${token}`;
+            
+            const url = `http://localhost:9801/verify/${token}`;
 
             let query = {
                 name: "addVerificationToken",
