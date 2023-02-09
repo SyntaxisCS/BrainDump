@@ -13,7 +13,9 @@ const deriveKey = (userId, plainTextPassword, salt) => {
             if (err) {
                 reject(err);
             } else {
-                resolve(key.toString());
+                let base64 = key.toString("base64");
+
+                resolve(base64);
             }
         });
     });

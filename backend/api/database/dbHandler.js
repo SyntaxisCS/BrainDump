@@ -568,7 +568,6 @@ const updateAllNoteEncryption = async (userId, newPassword, salt) => {
         getUserByUUID(userId).then(user => {
             // get decrypted notes
             getAllNotes(user.email).then(response => {
-                console.log(response);
                 if (response === "Could not find any notes for specified user") {
 
                     resolve(`Password Change Request for user ${userId} complete`);
@@ -577,7 +576,7 @@ const updateAllNoteEncryption = async (userId, newPassword, salt) => {
                     let notes = response.notes;
                     // derive key from new password
                     deriveKey(userId, newPassword, salt).then(key => {
-                        console.log(key);
+
                         // Encrypt key
                         let encryptedKey = encryptKey(key);
                         
@@ -586,7 +585,7 @@ const updateAllNoteEncryption = async (userId, newPassword, salt) => {
                             // Run through decrypted notes and update them
                             notes.forEach(note => {
                                 // Update notes with current content to use new key for encryption
-                                updateNote(userId, note.id, notes.content).then(response => {
+                                updateNote(userId, note.id, note.content).then(response => {
                                     console.info(`Updated note encryption (id: ${note.id}) at ${new Date()} during pending password change request`);
                                 }, err => {
                                     console.info(`Failed to update note encryption (id: ${note.id}) at ${new Date()} during pending password change request`);
@@ -884,9 +883,10 @@ const deletePasswordToken = async (userId) => {
 const addVerificationToken = async (userId, token) => {
     return new Promise((resolve, reject) => {
         // check if already exists
-        getVerificationToken(userId).then(token => {
+        getVerificationToken(userId).then(oldToken => {
             // delete then create
             deleteVerificationToken(userId).then(success => {
+
                 // create token
                 let expire = moment().add(10, "minutes").toISOString();
 
@@ -915,7 +915,7 @@ const addVerificationToken = async (userId, token) => {
         }, err => {
             // if no then create
             let expire = moment().add(10, "minutes").toISOString();
-            
+
             const url = `http://localhost:9801/verify/${token}`;
 
             let query = {

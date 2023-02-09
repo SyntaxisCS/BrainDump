@@ -277,25 +277,39 @@ users.post("/changepassword", ensureAuthentication, (req, res) => {
     // Check old password
     authenticate(req.session.user.email, req.body.oldPassword).then(authenticated => {
         
-        // Change password
-        changeUserPassword(req.session.user.email, req.body.newPassword).then(response => {
+        // check if user is verified
+        isVerified(req.session.user.email).then(result => {
             
-            // Send email
-            sendPasswordChangeNotification(req.session.user.email).then(success => {
-                // Send api response on success
-                res.send("Password changed");
-            }, err => {
-                res.status(500).send({error: err});
-            });
+            if (result.verified) {
+                
+                // Change password if user is verified
+                changeUserPassword(req.session.user.email, req.body.newPassword).then(response => {
+                    
+                    // Send email
+                    sendPasswordChangeNotification(req.session.user.email).then(success => {
+                        // Send api response on success
+                        res.send("Password changed");
+                    }, err => {
+                        res.status(500).send({error: err});
+                    });
+
+                }, err => {
+                    if (err === "Passwords cannot match") {
+                        res.status(400).send({error: "Your password can not be the same"});
+                    } else {
+                        console.error(err);
+                        res.status(500).send({error: "Could not change password. Please try again later"});
+                    }
+                });
+
+            } else {
+                res.status(403).send({error: "You must have a verified email to change your password"});
+            }
 
         }, err => {
-            if (err === "Passwords cannot match") {
-                res.status(400).send({error: "Your password can not be the same"});
-            } else {
-                console.error(err);
-                res.status(500).send({error: "Could not change password. Please try again later"});
-            }
+            res.status(500).send({error: "Unable to check email verification status"});
         });
+
     }, err => {
         res.status(403).send({error: "Old password not correct"});
     });

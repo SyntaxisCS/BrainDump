@@ -34,7 +34,7 @@ export const ChangePasswordModal = ({isOpen, onClose}) => {
         // Fields filled in
         if (oldPassword != "" && newPassword != "" && newPasswordConfirm != "") {
             // old password and new password equal check
-            if (oldPassword === newPassword) {
+            if (oldPassword != newPassword) {
 
                 // check if password and password confirm are the same
                 if (newPassword === newPasswordConfirm) {
@@ -81,7 +81,19 @@ export const ChangePasswordModal = ({isOpen, onClose}) => {
             let errReponse = err.response;
 
             if (errReponse.status === 400) {
+
                 setFormError(errReponse.data.error);
+
+            } else if (errReponse.status === 403) { 
+
+                if (errReponse.data.error === "Old password not correct") {
+                    setFormError(errReponse.data.error);
+                } else if (errReponse.data.error === "You must have a verified email to change your password") {
+                    setFormError(errReponse.data.error);
+                } else {
+                    setFormError("Could not change password. Please try again later");
+                }
+
             } else {
                 setFormError("Could not change password. Please try again later");
             }
@@ -102,7 +114,7 @@ export const ChangePasswordModal = ({isOpen, onClose}) => {
                     <input type="password" name="oldPassword" onChange={handleInputChange}/>
 
                     <label htmlFor="newPassword">New Password</label>
-                    <input type="password" name="newPassowrd" onChange={handleInputChange}/>
+                    <input type="password" name="newPassword" onChange={handleInputChange}/>
 
                     <label htmlFor="newPasswordConfirm">Confirm New Password</label>
                     <input type="password" name="newPasswordConfirm" onChange={handleInputChange}/>
