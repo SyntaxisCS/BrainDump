@@ -448,7 +448,7 @@ users.post("/changeemail", ensureAuthentication, (req, res) => {
 });
 
 users.post("/generateemailchangelink", ensureAuthentication, (req, res) => {
-    
+
     isVerified(req.session.user.email).then(verified => {
         // Check if verified
         if (verified.verified) {

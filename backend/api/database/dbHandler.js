@@ -1015,6 +1015,40 @@ const addEmailChangeToken = async (userId, token) => {
     return new Promise((resolve, reject) => {
         // check if already exists
         getEmailChangeToken(userId).then(oldToken => {
+            // delete then create
+            deleteEmailChangeToken(userId).then(success => {
+
+                let expire = moment().add(10, "minutes").toISOString();
+
+                const url = `http://localhost:9801/changeemail/${token}`;
+
+                // DB query
+                let query = {
+                    name: "addEmailChangeToken",
+                    text: "INSERT INTO email_tokens (user_id, token, expire) VALUES ($1,$2,$3)",
+                    values: [userId, token, expire]
+                };
+
+                // Make query
+                DB.query(query).then(response => {
+                    
+                    if (response.rowCount > 0) {
+                        // success
+                        resolve(url);
+                    } else {
+                        reject("Could not add token");
+                    }
+
+                }, err => {
+                    console.error(err);
+                    reject(err);
+                });
+
+            }, err => {
+                // failed to delete
+                console.error(err);
+                reject("Token already exists, could not delete old token, therefore did not create new token");
+            });
 
         }, err => {
             // if no then create

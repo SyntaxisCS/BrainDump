@@ -22,9 +22,17 @@ export const Notification = () => {
     };
 
     React.useEffect(() => {
-        Events.on("notify", () => {
+
+        const notify = () => {
             handleDisplay();
-        });
+        };
+
+        Events.on("notify", notify);
+
+        return () => {
+            Events.removeListener("notify", notify);
+        };
+        
     }, []);
 
     return (

@@ -24,6 +24,14 @@ export const AccountSettingsPanel = () => {
     const [emailModal, setEmailModal] = React.useState(false);
     const [passwordModal, setPasswordModal] = React.useState(false);
 
+    // Email Modal
+    const [emailTitle, setEmailTitle] = React.useState("Please wait...");
+    const [emailMessage, setEmailMessage] = React.useState("");
+
+    // Other States
+    const [verifyNoti, setVerifyNoti] = React.useState(false);
+    const [verifyNotiMessage, setVerifyMessage] = React.useState("Resend Verification Email");
+
     // Name Modal Methods
     const handleOpenNameModal = () => {
         setNameModal(true);
@@ -35,6 +43,7 @@ export const AccountSettingsPanel = () => {
 
     // Email Modal Methods
     const handleOpenEmailModal = () => {
+        emailChange();
         setEmailModal(true);
     };
 
@@ -70,6 +79,12 @@ export const AccountSettingsPanel = () => {
             withCredentials: true
         }).then(response => {
             setUserState(response.data.user);
+
+            if (!response.data.user.email_verified) {
+                setVerifyNoti(true);
+            } else {
+                setVerifyNoti(false);
+            }
         }, err => {
             console.error(err);
             setUserState(null);
@@ -90,14 +105,73 @@ export const AccountSettingsPanel = () => {
         });
     };
 
+    const emailChange = () => {
+        // api call to backend and then close modal
+        axios.post("http://localhost:9802/users/generateemailchangelink", {}, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            withCredentials: true
+        }).then(response => {
+            setEmailTitle("We've sent you an email!");
+            setEmailMessage("Please check your old email for the link we sent to change your email! If you don't see it be sure to grab your torches and go into the dangerous place known as your spam folder");
+
+            setTimeout(() => {
+                onclose();
+            }, 5000);
+        }, err => {
+            let errResponse = err.response;
+
+            if (errResponse.status == 400) {
+                setEmailTitle("There has been an error!");
+                setEmailMessage(`${errResponse.data.error}. Please try again later!`);
+            } else {
+                if (errResponse.data.error === "Could not send email") {
+                    setEmailTitle(errResponse.data.error);
+                    setEmailMessage("Unfortunately we could not send the email. Please try again later!");
+                } else {
+                    setEmailTitle(errResponse.data.error);
+                    setEmailMessage("There was an error. Please try again later! Sorry for the inconvience");
+                }
+            }
+        });
+    };
+
+    const sendEmailVerificationLink = () => {
+
+        let callBody = {
+            email: userState.email
+        };
+
+        axios.post("http://localhost:9802/users/generateemailverificationlink", callBody, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            withCredentials: true
+        }).then(response => {
+            setVerifyMessage("Email Sent");
+        }, err => {
+            setVerifyMessage("Email failed to send");
+        });
+
+    };
+
     // On page load
     React.useEffect(() => {
         getUser();
 
-        // Events
-        Events.on("nameChange", () => {
+        const nameChangeListener = () => {
             getUser();
-        });
+        };
+
+        // Events
+        Events.on("nameChange", nameChangeListener);
+
+        // Remove event listener to prevent memory leaks
+        return () => {
+            Events.removeListener("nameChange", nameChangeListener);
+        };
+
     }, []);
 
     return (
@@ -123,9 +197,10 @@ export const AccountSettingsPanel = () => {
                          <div className="innerField">
                             <h3>Email</h3>
                             <span>{userState ? userState.email : "Could not get email"}</span>
+                            <span className={`verifyEmailNotification ${verifyNoti ? "show" : "hidden"}`} onClick={sendEmailVerificationLink}>{verifyNotiMessage}</span>
 
                             {/*Change Email Modal*/}
-                            <ChangeEmailModal isOpen={emailModal} onClose={handleCloseEmailModal}/>
+                            <ChangeEmailModal isOpen={emailModal} onClose={handleCloseEmailModal} title={emailTitle} message={emailMessage}/>
                         </div>
                         <span><button className="editButton" onClick={handleOpenEmailModal}>Edit</button></span>
                     </div>

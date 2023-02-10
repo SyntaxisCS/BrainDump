@@ -46,6 +46,25 @@
     font-size: 16px;
 }
 
+.accountSettingsPanel .panel .fieldList .field .innerField .verifyEmailNotification {
+    padding: 4px 10px 4px 10px;
+    margin-left: 0.5em;
+    border-radius: 10px;
+    background-color: #0049c6;
+}
+
+.accountSettingsPanel .panel .fieldList .field .innerField .verifyEmailNotification.show {
+    display: inline-block;
+}
+
+.accountSettingsPanel .panel .fieldList .field .innerField .verifyEmailNotification.hidden {
+    display: none;
+}
+
+.accountSettingsPanel .panel .fieldList .field .innerField .verifyEmailNotification:hover {
+    background-color: #0040ad;
+}
+
 .accountSettingsPanel .panel .fieldList .field .editButton {
     width: 8%;
     margin: 0.5em 1% 0.5em 1%;

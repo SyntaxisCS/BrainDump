@@ -39,7 +39,7 @@ export const ThemeProvider = ({children}) => {
         if (savedTheme) {
             changeTheme(savedTheme);
         } else {
-            changeTheme("light");
+            changeTheme("abyss");
         }
     },[]);
 

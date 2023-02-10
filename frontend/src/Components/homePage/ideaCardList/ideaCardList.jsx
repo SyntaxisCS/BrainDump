@@ -34,9 +34,16 @@ export const IdeaCardList = () => {
         // Initial note retrieval
         retrieveNotes();
 
-        Events.on("createdNote", () => {
+        const retriveNoteListener = () => {
             retrieveNotes();
-        });
+        };
+
+        Events.on("createdNote", retriveNoteListener);
+
+        return () => {
+            Events.removeListener("createdNote", retriveNoteListener);
+        };
+        
     }, []);
 
     return (
