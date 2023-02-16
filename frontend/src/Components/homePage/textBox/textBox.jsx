@@ -99,6 +99,10 @@ export const TextBox = () => {
 
     React.useEffect(() => {
         window.addEventListener("beforeunload", handleWindowClose());
+
+        return () => {
+            window.removeEventListener("beforeunload", handleWindowClose);
+        };
     }, []);
 
     return (

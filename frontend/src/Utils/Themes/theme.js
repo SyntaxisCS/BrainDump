@@ -1,54 +1,64 @@
 const React = require("react");
 import Cookies from "universal-cookie";
 
-const ThemeContext = React.createContext(null);
+// Export for PureComponent compatibility
+export const ThemeContext = React.createContext(null);
 const cookies = new Cookies();
 
-export const ThemeProvider = ({children}) => {
-    const [theme, setTheme] = React.useState(""); // default = light (light = ""(nothing))
+export class ThemeProvider extends React.PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            theme: "",
+        };
 
-    const changeTheme = (newTheme) => {
-        switch(newTheme) {
+        this.changeTheme = this.changeTheme.bind(this);
+    }
+
+    componentDidMount() {
+        let savedTheme = cookies.get("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa");
+        if (savedTheme) {
+            this.changeTheme(savedTheme);
+        } else {
+            this.changeTheme("abyss");
+        }
+    }
+
+    changeTheme (newTheme) {
+        switch (newTheme) {
             case "light":
-                setTheme("");
+                this.setState({ theme: "" });
                 cookies.remove("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa");
                 cookies.set("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa", "light");
-            break;
+                break;
 
             case "dark":
-                setTheme("darkTheme");
+                this.setState({ theme: "darkTheme" });
                 cookies.remove("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa");
                 cookies.set("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa", "dark");
-            break;
+                break;
 
             // add cases if more themes are added
             case "abyss":
-                setTheme("abyssTheme");
+                this.setState({ theme: "abyssTheme" });
                 cookies.remove("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa");
                 cookies.set("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa", "abyss");
-            break;
+                break;
 
             default: // set default to light theme
-                setTheme("");
+                this.setState({ theme: "darkTheme" });
                 break;
         }
-    };
+    }
 
-    React.useEffect(() => {
-        let savedTheme = cookies.get("$2a$12$ISGZk0Tm4PHs629z12WG9uySa9/1oohRRRgbuEzTVY9q5T6CzFVpa");
-        if (savedTheme) {
-            changeTheme(savedTheme);
-        } else {
-            changeTheme("abyss");
-        }
-    },[]);
-
-    return (
-        <ThemeContext.Provider value={{theme, changeTheme}}>
-            {children}
-        </ThemeContext.Provider>
-    )
-};
+    render() {
+        return (
+            <ThemeContext.Provider value={{theme: this.state.theme, changeTheme: this.changeTheme}}>
+                {this.props.children}
+            </ThemeContext.Provider>
+        )
+    }
+}
 
 export const useTheme = () => {
     return React.useContext(ThemeContext);

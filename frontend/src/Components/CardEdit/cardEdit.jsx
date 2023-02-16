@@ -64,7 +64,7 @@ export const CardEditTemplate = (props) => {
             }).then(response => {
                 dispatchEvent("updatedNote");
 
-                notif.addNotification({type: "updated", message: "Your note has been updated!"});
+                notif.addNotification({type: "good", message: "Your note has been updated!"});
             }, err => {
                 let errResponse = err.response;
 
@@ -90,7 +90,7 @@ export const CardEditTemplate = (props) => {
         }).then(response => {
             dispatchEvent("deletedNote");
 
-            notif.addNotification({type: "deleted", message: "Your note has been deleted"});
+            notif.addNotification({type: "good", message: "Your note has been deleted"});
 
             // Redirect back to home page
             navigate("/");

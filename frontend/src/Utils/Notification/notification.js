@@ -27,6 +27,10 @@ export const NotificationProvider = ({children}) => {
                 notif.title = "We are so sorry!";
             break;
 
+            case "good":
+                notif.title = "Success!";
+            break;
+
             default:
                 notif.title = "We are so sorry!";
             break;

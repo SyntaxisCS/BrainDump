@@ -169,7 +169,7 @@ export const AccountSettingsPanel = () => {
 
         // Remove event listener to prevent memory leaks
         return () => {
-            Events.removeListener("nameChange", nameChangeListener);
+            Events.off("nameChange", nameChangeListener);
         };
 
     }, []);
