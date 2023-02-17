@@ -65,6 +65,10 @@ export const TextBox = () => {
                     if (errResponse.status === 500) {
                         notif.addNotification({type: "error", message: "Your note could not be saved. Please try again later"});
                         console.warn("Could not save note!");
+                    } else if (errResponse.status === 400) {
+                        notif.addNotification({type: "error", message: "You have met the maximum number of notes for your account. Please delete or modify existing ones!"});
+                    } else {
+                        console.warn(errResponse.data.error);
                     }
                 } else {
                     notif.addNotification({type: "error", message: "Your note could not be saved. Please try again later"});

@@ -84,8 +84,16 @@ notes.post("/create", ensureAuthentication, noteLimiter, (req, res) => {
 
         res.status(201).send(createdNote);
     }, err => {
-        console.log(err);
-        res.status(500).send({error: "Could not create note"});
+
+        if (err === "User has met maximum number of notes for account") {
+        
+            res.status(400).send({error: "You have met the maximum number of notes for your account"})
+        
+        } else {
+            console.log(err);
+            res.status(500).send({error: "Could not create note"});
+        }
+        
     });
 });
 
