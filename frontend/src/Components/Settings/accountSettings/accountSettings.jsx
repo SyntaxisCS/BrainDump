@@ -156,6 +156,21 @@ export const AccountSettingsPanel = () => {
 
     };
 
+    const downloadAccountData = () => {
+        
+        axios.post("http://localhost:9802/users/downloadaccountdata", {}, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            withCredentials: true
+        }).then(response => {
+            console.info(response);
+        }, err => {
+            console.error(err.response.data.error);
+        });
+
+    };
+
     // On page load
     React.useEffect(() => {
         getUser();
@@ -231,7 +246,7 @@ export const AccountSettingsPanel = () => {
             <div className={`dangerZonePanel ${theme.theme}`}>
                 <h3>Download Account Data</h3>
                 <p>Get sent an email with a zip file containing all information related to your account including account information and decrypted notes. Notes are encrypted using your password so while you can see your own notes we have no way of decrypting your notes server-side</p>
-                <button className="downloadDataBtn">Send</button>
+                <button className="downloadDataBtn" onClick={downloadAccountData}>Send</button>
 
                 <h3>Delete Account</h3>
                 <p>Immediately delete your account. Once you click "delete" our servers will immediately start processing the deletion of your account. This is an irreversable account and cannot be stopped once started. Be careful.</p>

@@ -52,7 +52,7 @@ app.use(session({
         tableName: process.env.pgUserSessions
     }),
     cookie: {
-        maxAge: 1000 * 60 * 60 // 60 minutes ---- CHANGE!!!!!
+        maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
     }
 }));
 

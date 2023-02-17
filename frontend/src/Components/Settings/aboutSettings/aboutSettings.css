@@ -1,0 +1,16 @@
+.aboutSettings {
+    display: flex;
+    margin-left: 20em;
+    background: none;
+}
+
+.aboutSettings .panel {
+    height: 30%;
+    width: 40%;
+    margin: auto;
+    margin-top: 5em;
+}
+
+.aboutSettings .panel span {
+    float: right;
+}

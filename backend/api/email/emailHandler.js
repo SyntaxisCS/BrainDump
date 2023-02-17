@@ -1,4 +1,5 @@
 const nodeMailer = require("nodemailer");
+const fs = require("fs");
 
 // helper functions
 const { generateToken } = require("../../Utils/nanoIdGenerator");
@@ -206,11 +207,53 @@ const sendEmailChangeLink = async (recipient) => {
     });
 };
 
+const sendAccountData = async (recipient, filePath) => {
+    return new Promise((resolve, reject) => {
+
+        // check if recipient and file path is provided
+        if (recipient && filePath) {
+
+            // get file
+            const zipFile = fs.readFileSync(filePath);
+
+            // Create Email Options
+            const mailOptions = {
+                from: emailSender,
+                to: recipient,
+                subject: "Here is all the data we have that is associated with your account...",
+                html: ``,
+                attachments: [
+                    {
+                        filename: "account_data.zip",
+                        content: zipFile,
+                        contentType: "application/zip"
+                    }
+                ]
+            };
+
+            transporter.sendMail(mailOptions).then(info => {
+                // Delete zip file
+                fs.rmSync(filePath);
+
+                resolve(`Account data email sent to ${recipient} at ${new Date()}`);
+            }, err => {
+                console.error(err);
+                reject("Could not send email");
+            });
+
+        } else {
+            reject("Recipient or file path not provided");
+        }
+
+    });
+};
+
 module.exports = {
     sendAccountCreationNotification,
     sendPasswordChangeNotification,
     sendEmailChangeNotification,
     sendForgotPasswordLink,
     sendEmailVerificationLink,
-    sendEmailChangeLink
+    sendEmailChangeLink,
+    sendAccountData
 };

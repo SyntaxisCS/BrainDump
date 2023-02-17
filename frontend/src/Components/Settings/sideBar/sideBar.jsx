@@ -26,6 +26,12 @@ export const SideBar = () => {
                         <span className={`linksName ${theme.theme}`}>Appearance</span>
                     </NavLink>
                 </li>
+                <li>
+                    <NavLink to="/settings/about" className={({isActive}) => (isActive ? `active ${theme.theme}` : `none ${theme.theme}`)}>
+                        <i className='bx bx-palette'/>
+                        <span className={`linksName ${theme.theme}`}>About</span>
+                    </NavLink>
+                </li>
                 <li className={`returnBtn ${theme.theme}`} onClick={handleBackButton}>
                     <a>
                         <i className='bx bx-arrow-back'/>

@@ -21,11 +21,13 @@ export const Notification = () => {
         
         setTimeout(() => {
             setDisplay(false);
+            setIcon("");
         }, time);
     };
 
     const closeNotif = () => {
         setDisplay(false);
+        setIcon("");
         useNotif().clearNotification();
     };
 
@@ -41,7 +43,7 @@ export const Notification = () => {
             break;
 
             case "good":
-                setIcon("bx-check-double");
+                setIcon("bx-check");
             break;
 
             default:

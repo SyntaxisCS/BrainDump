@@ -12,6 +12,7 @@ import "./index.css";
 import {HomePage} from "./Pages/homePage";
 import {AccountSettings} from "./Pages/Settings/account";
 import {AppearanceSettings} from "./Pages/Settings/appearance";
+import { AboutPage } from "./Pages/Settings/about";
 import {LoginPage} from "./Pages/LoginPage";
 import {CardEditPage} from "./Pages/cardEditPage";
 import {SignUpPage} from "./Pages/SignUpPage";
@@ -31,6 +32,7 @@ ReactDOM.render((
                         {/*Settings*/}
                         <Route path="/settings/account" element={<RequireAuth><AccountSettings/></RequireAuth>}/>
                         <Route path="/settings/appearance" element={<RequireAuth><AppearanceSettings/></RequireAuth>}/>
+                        <Route path="/settings/about" element={<RequireAuth><AboutPage/></RequireAuth>}/>
 
                         {/*Auth*/}
                         <Route path="/login" element={<LoginPage/>}/>

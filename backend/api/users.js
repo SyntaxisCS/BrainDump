@@ -9,12 +9,12 @@ const passport = require("passport");
 const users = express.Router();
 
 // Database Handlers
-const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail, isVerified, checkEmailChangeToken, deleteEmailChangeToken} = require("./database/dbHandler");
+const {getUserByUUID, getUserByEmail, getAllUsers, createUser, deleteUser, changeUserName, changeUserEmail, changeUserPassword, deleteAllNotes, deleteKey, addPasswordToken, getPasswordToken, checkPasswordToken, deletePasswordToken, authenticate, checkVerificationToken, verifyEmail, isVerified, checkEmailChangeToken, deleteEmailChangeToken, downloadAccountData} = require("./database/dbHandler");
 
 // Helpers
 const {generateUUID} = require("../Utils/uuidGenerator");
 const { generateToken } = require("../Utils/nanoIdGenerator");
-const { sendForgotPasswordLink, sendEmailVerificationLink, sendAccountCreationNotification, sendPasswordChangeNotification, sendEmailChangeLink, sendEmailChangeNotification } = require("./email/emailHandler");
+const { sendForgotPasswordLink, sendEmailVerificationLink, sendAccountCreationNotification, sendPasswordChangeNotification, sendEmailChangeLink, sendEmailChangeNotification, sendAccountData } = require("./email/emailHandler");
 
 // Middleware
 const ensureAuthentication = (req, res, next) => {
@@ -539,6 +539,35 @@ users.post("/generateemailverificationlink", emailLimiter, (req, res) => {
         });
     } else {
         res.status(400).send({error: "Email not provided"});
+    }
+});
+
+users.post("/downloadaccountdata", ensureAuthentication, (req, res) => {
+    if (req.session.user.email) {
+        // get user
+        getUserByEmail(req.session.user.email).then(user => {
+
+            // create zip
+            downloadAccountData(user.uuid).then(filePath => {
+                
+                sendAccountData(req.session.user.email, filePath).then(success => {
+                    res.status(201).send("Zip file created and email sent!");
+                }, err => {
+                    res.status(500).send({error: "Could not send email!"});
+                });
+
+                res.status(201).send("Zip file created");
+            }, err => {
+                res.status(500).send({error: "Could not create zip file. Please try again later"});
+            });
+
+        }, err => {
+            if (err === "No users found") {
+                res.status(204).send({error: err});
+            } else {
+                res.status(500).send({error: "Could not complete request"});
+            }
+        });
     }
 });
 

@@ -13,6 +13,15 @@
   transition: all 0.5s;
   background-color: #1c1d20;
 }
+
+.notification.show {
+  display: block;
+}
+
+.notification.hidden {
+  display: none;
+}
+
 .notification h1 {
   margin: 0;
   z-index: 3;

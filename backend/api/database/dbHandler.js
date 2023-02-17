@@ -2,6 +2,8 @@
 const {Client} = require("pg");
 const bcrypt = require("bcrypt");
 const validator = require("validator");
+const fs = require("fs");
+const JSZip = require("jszip");
 const moment = require("moment");
 
 // Helper functions
@@ -360,6 +362,66 @@ const authenticate = async (email, password) => {
     });
 };
 
+const downloadAccountData = async (userId) => {
+    return new Promise((resolve, reject) => {
+        getUserByUUID(userId).then(user => {
+
+            // create temp folder filePath
+            const tempFolderPath = path.join("temp", user.uuid);
+
+            // create temp folder
+            fs.mkdirSync(tempFolderPath, {recursive: true}); 
+            console.info(`Temp Directory created ${tempFolderPath} at ${new Date()}`);
+
+            // User.json
+            const userJSONData = JSON.stringify(user, null, 4);
+            const userFilePath = path.join(tempFolderPath, "user.json");
+
+            fs.writeFileSync(userFilePath, userJSONData);
+            console.info(`Temp file user.json created for ${user.uuid} at ${new Date()}`);
+
+            // get all user notes
+            getAllNotes(user.email).then(notes => {
+
+                const noteJSONData = JSON.stringify(notes.notes, null, 4);
+                const noteFilePath = path.join(tempFolderPath, "notes.json");
+                console.log(noteFilePath);
+
+                fs.writeFileSync(noteFilePath, noteJSONData);
+                console.info(`Temp file notes.json created for ${user.uuid} at ${new Date()}`);
+                
+                // Create zip file
+
+                const zip = new JSZip();
+
+                // user.json
+                zip.file("user.json", fs.readFileSync(userFilePath));
+                zip.file("notes.json", fs.readFileSync(noteFilePath));
+
+                // generate stream
+                zip.generateNodeStream({type: "nodebuffer", streamFiles: true})
+                .pipe(fs.createWriteStream(path.join("temp", `user_${user.uuid}.zip`)))
+                .on("finish", () => {
+                    console.info(`Zip file created for ${user.uuid} at ${new Date()}. Cleaning up...`);
+
+                    // Remove original temp folder, leaving just zip file
+                    fs.rmSync(tempFolderPath, {recursive: true});
+                    console.info(`Original temp folder for user ${user.uuid} deleted on ${new Date()}`);
+                    console.info(`Zip file for user ${user.uuid} created at ${new Date()}`);
+
+                    resolve(path.join("temp", `user_${user.uuid}.zip`));
+                });
+
+            }, err => {
+                reject(err);
+            });
+
+        }, err => {
+            reject("Could not get user");
+        });
+    });
+};
+
 // NOTES ---------------------------------------------------------
 
 // v Note database schema v
@@ -471,52 +533,60 @@ const createNote = async (noteObject) => {
         // get user
         getUserByUUID(noteObject.uuid).then(user => {
 
-            // prepare note
+            // Check number of notes
+            checkNumberOfNotes(user.email).then(good => {
+                
+                // prepare note
 
-            // id
-            let genNoteId = generateNoteId();
-            checkNoteId(genNoteId).then(response => {}, err => {
-                genNoteId = generateNoteId();
-            });
-
-            // Timestamps (updatedDate = creationDate (same time))
-            let date = new Date();
-
-            // get key
-            getKey(user.uuid).then(key => {
-                // encrypt content
-                let encryptedText = aes256.encrypt(key, noteObject.content);
-
-                // New Note Object
-                let newNote = {
-                    id: genNoteId,
-                    userId: user.uuid,
-                    content: encryptedText,
-                    updatedDate: date,
-                    creationDate: date
-                };
-
-                // Database query
-                let query = {
-                    name: "createNote",
-                    text: "INSERT INTO notes (id, user_id, content, updated_date, creation_date) VALUES ($1,$2,$3,$4,$5)",
-                    values: [newNote.id, newNote.userId, newNote.content, newNote.updatedDate, newNote.creationDate]
-                };
-
-                DB.query(query).then(response => {
-                    if (response.rowCount > 0) {
-                        // success
-                        resolve(newNote);
-                    } else {
-                        reject("Could not create note");
-                    }
-                }, err => {
-                    // fail
-                    reject(err);
+                // id
+                let genNoteId = generateNoteId();
+                checkNoteId(genNoteId).then(response => {}, err => {
+                    genNoteId = generateNoteId();
                 });
+
+                // Timestamps (updatedDate = creationDate (same time))
+                let date = new Date();
+
+                // get key
+                getKey(user.uuid).then(key => {
+                    // encrypt content
+                    let encryptedText = aes256.encrypt(key, noteObject.content);
+
+                    // New Note Object
+                    let newNote = {
+                        id: genNoteId,
+                        userId: user.uuid,
+                        content: encryptedText,
+                        updatedDate: date,
+                        creationDate: date
+                    };
+
+                    // Database query
+                    let query = {
+                        name: "createNote",
+                        text: "INSERT INTO notes (id, user_id, content, updated_date, creation_date) VALUES ($1,$2,$3,$4,$5)",
+                        values: [newNote.id, newNote.userId, newNote.content, newNote.updatedDate, newNote.creationDate]
+                    };
+
+                    DB.query(query).then(response => {
+                        if (response.rowCount > 0) {
+                            // success
+                            resolve(newNote);
+                        } else {
+                            reject("Could not create note");
+                        }
+                    }, err => {
+                        // fail
+                        reject(err);
+                    });
+                }, err => {
+                    reject("Could not get encryption key");
+                });
+                
             }, err => {
-                reject("Could not get encryption key");
+                reject("User has met maximum number of notes for account");
             });
+
         }, err => { // getUserByEmail Error
             console.error(err);
             reject("Could not validate user");
@@ -657,6 +727,60 @@ const checkNoteId = async (id) => {
             console.error(err);
             reject(false);
         });
+    });
+};
+
+const checkNumberOfNotes = async (userEmail) => {
+    return new Promise((resolve, reject) => {
+        
+        if (userEmail) {
+
+            // get user
+            getUserByEmail(userEmail).then(user => {
+
+                // get all notes using email
+                getAllNotes(userEmail).then(notes => {
+
+                    // get notes
+                    let noteArray = notes.notes;
+    
+                    // Check user plan type
+                    if (user.plan_type === "paid") {
+
+                        // paid accounts can have 99 (unlimited notes)
+                        if (noteArray.length >= 99) {
+                            reject("User has met or exceeded max number of notes");
+                        } else {
+                            resolve(`User can create ${99 - noteArray.length} more notes`);
+                        }
+
+                    } else if (user.plan_type === "free") {
+
+                        // free accounts can have 10 notes
+                        if (noteArray.length >= 10) {
+                            reject("User has met or exceeded max number of notes");
+                        } else {
+                            resolve(`User can create ${10 - noteArray.length} more notes`);
+                        }
+
+                    } else {
+                        reject("Could not check number of notes");
+                    }
+    
+                }, err => {
+                    console.error(err);
+                    reject(err);
+                });
+
+            }, err => {
+                console.error(err);
+                reject(err);
+            });
+
+        } else {
+            reject("Email not provided");
+        }
+
     });
 };
 
@@ -1172,6 +1296,7 @@ module.exports = {
     verifyEmail,
     isVerified,
     authenticate,
+    downloadAccountData,
     
     // Notes
     getNoteById,
