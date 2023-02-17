@@ -50,6 +50,18 @@ const emailLimiter = rateLimit({
 
 });
 
+const accountDataLimiter = rateLimit({
+    windowMs: 1000 * 60 * 60 * 24,
+    max: 1,
+    message: "You can only request account data once per day. Please try again later",
+    statusCode: 429,
+    handler: (req, res, next, options) => {
+        res.status(options.statusCode).send(options.message);
+    },
+    standardHeaders: true,
+    store: new MemoryStore()
+});
+
 // Endpoints
 users.get("/authenticate", (req, res) => {
     if (req.session) {
@@ -419,7 +431,7 @@ users.post("/changeemail", ensureAuthentication, (req, res) => {
                     });
 
                 }, err => {
-
+                    res.status(500).send({error: "Unable to change email"});
                 });
 
             }, err => {
@@ -542,7 +554,7 @@ users.post("/generateemailverificationlink", emailLimiter, (req, res) => {
     }
 });
 
-users.post("/downloadaccountdata", ensureAuthentication, (req, res) => {
+users.post("/downloadaccountdata", ensureAuthentication, accountDataLimiter, (req, res) => {
     if (req.session.user.email) {
         // get user
         getUserByEmail(req.session.user.email).then(user => {

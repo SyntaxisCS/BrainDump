@@ -1,5 +1,6 @@
 // Express
 const express = require("express");
+const { rateLimit, MemoryStore } = require("express-rate-limit");
 
 // Passport
 const passport = require("passport");
@@ -18,6 +19,19 @@ const ensureAuthentication = (req, res, next) => {
         res.status(400).send({error: "Not authenticated"});
     }
 };
+
+// Limiters
+const noteLimiter = rateLimit({
+    windowMs: 1000*60*30,
+    max: 50,
+    message: "Whoat, slow down! You are handling those notes too fast! Take a break and try again later!",
+    statusCode: 429,
+    handler: (req, res, next, options) => {
+        res.status(options.statusCode).send(options.message);
+    },
+    standardHeaders: true,
+    store: new MemoryStore()
+});
 
 // Endpoints
 notes.get("/", ensureAuthentication, (req, res) => {
@@ -54,7 +68,7 @@ notes.get("/:noteid", ensureAuthentication, (req, res) => {
     });
 });
 
-notes.post("/create", ensureAuthentication, (req, res) => {
+notes.post("/create", ensureAuthentication, noteLimiter, (req, res) => {
 
     let noteObject = {
         uuid: req.session.user.uuid,
@@ -75,7 +89,7 @@ notes.post("/create", ensureAuthentication, (req, res) => {
     });
 });
 
-notes.delete("/:noteid", ensureAuthentication, (req, res) => {
+notes.delete("/:noteid", ensureAuthentication, noteLimiter, (req, res) => {
     let noteId = req.params.noteid;
 
     deleteNote(noteId).then(response => {
@@ -85,7 +99,7 @@ notes.delete("/:noteid", ensureAuthentication, (req, res) => {
     });
 });
 
-notes.post("/:noteid", ensureAuthentication, (req, res) => {
+notes.post("/:noteid", ensureAuthentication, noteLimiter, (req, res) => {
     let userId = req.session.user.uuid;
     let noteId = req.params.noteid;
     let newContent = req.body.content;

@@ -394,7 +394,7 @@ const downloadAccountData = async (userId) => {
 
                 const zip = new JSZip();
 
-                // user.json
+                // zip files
                 zip.file("user.json", fs.readFileSync(userFilePath));
                 zip.file("notes.json", fs.readFileSync(noteFilePath));
 
